@@ -1,0 +1,44 @@
+cmake_minimum_required(VERSION 3.28.3...4.3.0)
+project(wc_rewrite)
+
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+set(EXTERNAL_DIR "${CMAKE_CURRENT_SOURCE_DIR}/external/")
+
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+    message(STATUS "Setting build type to 'Debug' as none was specified.")
+    set(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build." FORCE)
+endif()
+
+set(MY_COMPILE_OPTIONS "-Wall" "-Wextra")
+set(MY_DEFINITIONS "PROJECT_VERSION=\"0.1.0\"")
+
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    list(APPEND MY_COMPILE_OPTIONS "-g" "-O0")
+    list(APPEND MY_DEFINITIONS "DEBUG_MODE=1" "ENABLE_ASSERTS=1")
+
+elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
+    list(APPEND MY_COMPILE_OPTIONS "-O3")
+    list(APPEND MY_DEFINITIONS "RELEASE_MODE=1" "ENABLE_ASSERTS=0")
+endif()
+
+
+file(GLOB_RECURSE MY_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
+
+add_executable("${CMAKE_PROJECT_NAME}")
+
+target_sources("${CMAKE_PROJECT_NAME}" PRIVATE ${MY_SOURCES})
+
+target_include_directories("${CMAKE_PROJECT_NAME}" PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src/")
+
+set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES
+        PREFIX ""
+        SUFFIX ""
+        OUTPUT_NAME "${CMAKE_PROJECT_NAME}"
+)
+
+target_compile_options(${CMAKE_PROJECT_NAME} PRIVATE ${MY_COMPILE_OPTIONS})
+target_compile_definitions(${CMAKE_PROJECT_NAME} PRIVATE ${MY_DEFINITIONS})
