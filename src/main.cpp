@@ -3,31 +3,52 @@
 #include <iostream>
 #include <format>
 #include <string>
+#include <unordered_map>
 
 
-struct Test
+struct ProgramArgs
 {
+	std::vector<std::string> files;
+	std::vector<std::string> opts;
 };
 
-std::vector<std::string> process_arguments(int argc, char** argv)
+ProgramArgs process_arguments(int argc, char** argv)
 {
 	if(argc < 2){
 		std::cerr << "Missing filename!" << std::endl;
 		std::exit(EXIT_FAILURE);
 	}
 
-	std::vector<std::string> arguments;
-	return arguments;
+	ProgramArgs args;
+
+	for(auto i = 0; i < argc; i++)
+	{
+		if(argv[i][0] == '-'){
+			args.opts.push_back(argv[i]);
+		} else {
+			args.files.push_back(argv[i]);
+		}
+
+	}
+
+	return args;
 }
 
 
 int main(int argc, char** argv)
 {
-	std::vector<std::string> arguments = process_arguments(argc, argv);
+	ProgramArgs args = process_arguments(argc, argv);
 
+	for(const auto& file : args.files)
+	{
+	     std::cout << file << std::endl;
+	}
 
-	std::cout << "Testing" << std::endl;
-	std::cout << std::format("test {}", "test") << std::endl;
+	for(const auto& opt : args.opts)
+	{
+	     std::cout << opt << std::endl;
+	}
+
 	return 0;
 }
 
