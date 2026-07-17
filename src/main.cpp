@@ -4,6 +4,8 @@
 #include <format>
 #include <string>
 #include <unordered_map>
+#include <fstream>
+#include <string_view>
 
 
 struct ProgramArgs
@@ -23,10 +25,13 @@ ProgramArgs process_arguments(int argc, char** argv)
 
 	for(auto i = 0; i < argc; i++)
 	{
-		if(argv[i][0] == '-'){
-			args.opts.push_back(argv[i]);
+     		std::string arg = argv[i];
+		if(arg[0] == '-'){
+			// TODO: check if valid option here, also check if grouped options
+			std::string plain_arg = arg.substr(1, arg.size() - 1);
+			args.opts.push_back(plain_arg);
 		} else {
-			args.files.push_back(argv[i]);
+			args.files.push_back(arg);
 		}
 
 	}
