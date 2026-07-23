@@ -1,0 +1,3 @@
+/home/lee/projects/wc-rewrite/build/CMakeFiles/wc_rewrite.dir
+/home/lee/projects/wc-rewrite/build/CMakeFiles/edit_cache.dir
+/home/lee/projects/wc-rewrite/build/CMakeFiles/rebuild_cache.dir
