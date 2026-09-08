@@ -3,6 +3,7 @@ package wc
 import "core:fmt"
 import "core:os"
 import "core:unicode/utf8"
+import "core:strings"
 
 Option :: enum {
 	Words,
@@ -26,8 +27,6 @@ process_args :: proc() -> ProgramArgs{
 		fmt.eprintln("No args")
 		os.exit(1)
 	}
-
-	// fmt.println("All args: ", os.args)
 
 	extracted_arg_chars: [dynamic]string
 	actual_args := os.args[1:]
@@ -82,7 +81,26 @@ print_help :: proc() {
 
 
 process_file :: proc(args: ^ProgramArgs) {
-	fmt.println("Process file here")
+
+	data, ferr := os.read_entire_file(args.files[0], context.allocator)
+
+	if ferr != nil {
+		fmt.eprintln("Failed opening file!", args.files[0], ferr)
+		return
+	}
+
+	defer delete(data, context.allocator)
+
+	it := string(data)
+	for line in strings.split_lines_iterator(&it) {
+		fmt.println(line)
+	}
+
+}
+
+
+count_words :: proc(args: &ProgramArgs) {
+	// for 
 }
 
 
@@ -102,6 +120,7 @@ main :: proc() {
 	}
 
 	process_file(&args)
+
 
 	// for option in args.options {
 	// 	fmt.println("Active opt: ", option)
