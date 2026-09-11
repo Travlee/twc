@@ -38,13 +38,11 @@ process_args :: proc() -> ProgramArgs{
 			continue
 		}
 
-
 		if arg == "--help" {
 			
 			processed_args.options += {Option.Help}
 			break
 		}
-
 
 		char, _ := utf8.decode_rune_in_string(arg)
 		if char == '-' {
@@ -57,6 +55,8 @@ process_args :: proc() -> ProgramArgs{
 					processed_args.options += {Option.Lines}
 				} else if char == 'L' {
 					processed_args.options += {Option.LongestLineLen}
+				} else if char == 'm' {
+					processed_args.options += {Option.Chars}
 				}
 			}
 
@@ -64,7 +64,6 @@ process_args :: proc() -> ProgramArgs{
 			append(&processed_args.files, arg)
 		}
 	}
-
 
 	return processed_args
 }
@@ -91,51 +90,79 @@ process_file :: proc(args: ^ProgramArgs) {
 
 	defer delete(data, context.allocator)
 
+	output := strings.builder_make()
+	
+	word_count := 0
+	char_count := 0
+	line_count := 0
+	max_line_length := 0
+	byte_count := 0
+
 	it := string(data)
 	for line in strings.split_lines_iterator(&it) {
-		fmt.println(line)
+		if .Words in args.options {
+			words_in_line := count_words_in_line(line)
+			word_count += words_in_line
+		}
+
+		if .Chars in args.options {
+			chars_in_line := count_chars_in_line(line)
+			char_count += chars_in_line
+		}
+
+		if .Lines in args.options {
+			line_count += 1
+		}
 	}
 
+	// formatting change
+	strings.write_rune(&output, ' ')
+
+	if line_count != 0 {
+		strings.write_int(&output, line_count)
+		strings.write_rune(&output, ' ')
+	}
+
+	if word_count != 0 {
+		strings.write_int(&output, word_count)
+		strings.write_rune(&output, ' ')
+	}
+
+	if char_count != 0 {
+		strings.write_int(&output, char_count)
+		strings.write_rune(&output, ' ')
+	}
+
+	strings.write_string(&output, args.files[0])
+
+	fmt.println(strings.to_string(output))
 }
 
 
-count_words :: proc(args: ^ProgramArgs) {
-	fmt.println("Counting words here")
-
-	data, ferr := os.read_entire_file(args.files[0], context.allocator)
-
-	if ferr != nil {
-		fmt.eprintln("Failed opening file!", args.files[0], ferr)
-		return
-	}
-
-	defer delete(data, context.allocator)
-
+count_words_in_line :: proc(line: string) -> int {
 	word_count := 0
-	it := string(data)
-	for line in strings.split_lines_iterator(&it) {
-		// last_word := strings.builder_make()
-		line_length := len(line)
-		for char, index in line {
-			if char == ' '{
-				// fmt.println(strings.to_string(last_word))
-				// strings.builder_reset(&last_word)
-				word_count += 1
-				continue
-			}
-			if index == line_length - 1 {
-				// fmt.println("end of line")
-				word_count += 1
-				continue
-			}
-			// strings.write_rune(&last_word, char)
-		}
 
-		// fmt.println(strings.to_string(last_word))
+	for char, index in line {
+		if char == ' ' {
+			word_count += 1
+		}
 	}
 
-	fmt.println("Words: ", word_count)
+	word_count += 1
+	return word_count
+}
 
+count_chars_in_line :: proc(line: string) -> int {
+	char_count := 0
+
+	for char in line {
+		char_count += 1
+	}
+	
+	// fix for missing line ending
+	char_count += 1
+
+	return char_count
 }
 
 
@@ -154,24 +181,24 @@ main :: proc() {
 		fmt.eprintln("Missing file!")
 	}
 
-	//process_file(&args)
+	process_file(&args)
 
 
-	for option in args.options {
-		fmt.println("Active opt: ", option)
-
-		#partial switch option {
-		case .Words:
-			count_words(&args)
-		case .Lines:
-			fmt.println("Doing lines!")
-		case .Chars:
-			fmt.println("Doing Chars!")
-		case .LongestLineLen:
-			fmt.println("Doing LongestLineLen!")
-		case .Bytes:
-			fmt.println("Doing bytes!")
-		}
-	}
+	// for option in args.options {
+	// 	fmt.println("Active opt: ", option)
+	//
+	// 	#partial switch option {
+	// 	case .Words:
+	// 		count_words(&args)
+	// 	case .Lines:
+	// 		fmt.println("Doing lines!")
+	// 	case .Chars:
+	// 		fmt.println("Doing Chars!")
+	// 	case .LongestLineLen:
+	// 		fmt.println("Doing LongestLineLen!")
+	// 	case .Bytes:
+	// 		fmt.println("Doing bytes!")
+	// 	}
+	// }
 
 }
